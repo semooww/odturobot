@@ -87,7 +87,7 @@ async def helperDrawings(img, centerX, centerY, approx=None, circle=None, letter
 async def black_mask(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = 255 - img
-    ret, mask = cv2.threshold(img, 200, 255, 0)
+    ret, mask = cv2.threshold(img, black_threshold, 255, 0)
     return mask
 
 
@@ -201,7 +201,7 @@ async def camera():
             if angle is not None:
                 cX = arrowX - cw
                 control_centerX, control_centerY = arrowX, arrowY
-                if 220 >= cX >= -220:
+                if symbol_slice >= cX >= -symbol_slice:
                     arrow_counter += 1
                     if arrow_counter > 15:
                         arrow_counter = 0
@@ -211,7 +211,7 @@ async def camera():
             if radius is not None:
                 cX = circleX - cw
                 control_centerX, control_centerY = circleX, circleY
-                if 220 >= cX >= -220:
+                if symbol_slice >= cX >= -symbol_slice:
                     circle_counter += 1
                     if circle_counter > 8:
                         circle_counter = 0
@@ -273,7 +273,7 @@ async def control_drone():
     print("Initialize completed.")
     global initialize
     initialize = True
-    time_circle = time_stamp + 5
+    time_circle = time_stamp + delay_fist_circle
     while True:
         if control_centerX is None or control_centerY is None:
             if vehicle_state != "Symbol":
@@ -299,8 +299,8 @@ async def control_drone():
                 if -5 <= angle <= 5 and -30 <= cX <= 30 and -30 <= cY <= 30:
                     vehicle_state = "Symbol"
                     arrow_counter = 0
-                    time_circle = time_stamp + 4
-                    time_arrow = time_stamp + 2
+                    time_circle = time_stamp + delay_circle
+                    time_arrow = time_stamp + delay_arrow
                     print(f"Vehicle state is changed to {vehicle_state}")
                     await asyncio.sleep(0)
                     continue
@@ -388,6 +388,11 @@ cyan = (0, 255, 255)
 black = (0, 0, 0)
 purple = (255, 0, 255)
 
+black_threshold = int(sys.argv[1])
+symbol_slice = int(sys.argv[2])
+delay_circle = int(sys.argv[3])
+delay_arrow = int(sys.argv[4])
+delay_fist_circle = int(sys.argv[5])
 yawThreshold = 30  # Threshold value for yaw
 controller = False  # check variable for the job
 initialize = False  # check the timer to start
